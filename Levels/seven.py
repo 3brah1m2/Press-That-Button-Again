@@ -14,7 +14,7 @@ class Seven:
         self.button_current = self.idle
         self.clicked_time = None
         self.checking_cursor = False
-
+        self.button_click_sound = pg.mixer.Sound("resources/button click.mp3")
         self.font = pg.font.SysFont(None, 48)
         self.text = self.font.render("Lvl 7: Hit & Run", True, (255, 255, 255))
         self.text_rect = self.text.get_rect(topleft=(20, 20))
@@ -38,6 +38,7 @@ class Seven:
                     running = False
                 elif event.type == pg.MOUSEBUTTONDOWN:
                     if self.button_rect.collidepoint(event.pos):
+                        self.button_click_sound.play()
                         self.button_current = self.closed
                         self.clicked_time = now
                         self.checking_cursor = True

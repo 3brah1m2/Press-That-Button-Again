@@ -26,7 +26,6 @@ class Five():
         self.wall_fallen = False
         self.wall_speed = 10
 
-        
         self.screws = [True] * 4
         self.screw_rects = [
             pg.Rect(self.wall_rect.left + 10, self.wall_rect.top + 10, 20, 20),
@@ -34,6 +33,7 @@ class Five():
             pg.Rect(self.wall_rect.left + 10, self.wall_rect.bottom - 30, 20, 20),
             pg.Rect(self.wall_rect.right - 30, self.wall_rect.bottom - 30, 20, 20)
         ]
+        self.screws_to_remove = []
 
         self.objects = {
             "screwdriver": {"surf": self.screwdriver, "rect": self.screwdriver.get_rect(topleft=(50, 200)), "dragging": False},
@@ -48,6 +48,15 @@ class Five():
         self.selected_obj = None
         self.offset_x = 0
         self.offset_y = 0
+
+        self.unscrew_sound = pg.mixer.Sound("resources/unscrewing.mp3")
+        self.metal_fall_sound = pg.mixer.Sound("resources/metal falling.mp3")
+        self.button_click_sound = pg.mixer.Sound("resources/button click.mp3")
+
+        self.metal_fall_played = False
+        self.unscrewing_playing = False
+        self.unscrew_start_time = 0
+        self.unscrew_duration = 1500  # milliseconds
 
         self.font = pg.font.SysFont(None, 48)
         self.text = self.font.render("Lvl 5: Mechanic", True, (255, 255, 255))
@@ -70,12 +79,15 @@ class Five():
                 elif event.type == pg.MOUSEBUTTONDOWN:
                     for key, obj in self.objects.items():
                         if obj["rect"].collidepoint(event.pos):
+                            if key == "screwdriver" and self.unscrewing_playing:
+                                continue
                             self.selected_obj = key
                             obj["dragging"] = True
                             self.offset_x = obj["rect"].x - event.pos[0]
                             self.offset_y = obj["rect"].y - event.pos[1]
 
                     if self.button_enabled and self.button_rect.collidepoint(event.pos):
+                        self.button_click_sound.play()
                         self.button_current = self.closed
                         self.clicked_time = now
                         self.level_passed = True
@@ -84,22 +96,37 @@ class Five():
                     if self.selected_obj:
                         obj = self.objects[self.selected_obj]
                         obj["dragging"] = False
-                        obj["falling"] = True
 
                         if self.selected_obj == "screwdriver":
                             for i in range(4):
                                 if self.screws[i] and obj["rect"].colliderect(self.screw_rects[i]):
-                                    self.screws[i] = False
+                                    if i not in self.screws_to_remove:
+                                        self.unscrewing_playing = True
+                                        self.unscrew_start_time = now
+                                        self.screws_to_remove.append(i)
+                                        self.unscrew_sound.play()
+                        else:
+                            obj["falling"] = True
 
                     self.selected_obj = None
 
                 elif event.type == pg.MOUSEMOTION and self.selected_obj:
                     obj = self.objects[self.selected_obj]
-                    if obj["dragging"]:
+                    if obj["dragging"] and not (self.selected_obj == "screwdriver" and self.unscrewing_playing):
                         obj["rect"].x = event.pos[0] + self.offset_x
                         obj["rect"].y = event.pos[1] + self.offset_y
 
-            for obj in self.objects.values():
+            # Screw removal after sound finishes
+            if self.unscrewing_playing and now - self.unscrew_start_time >= self.unscrew_duration:
+                self.unscrewing_playing = False
+                for i in self.screws_to_remove:
+                    self.screws[i] = False
+                self.screws_to_remove.clear()
+
+            # Handle object falling
+            for key, obj in self.objects.items():
+                if key == "screwdriver" and self.unscrewing_playing:
+                    continue
                 if obj["falling"]:
                     if obj["rect"].y < obj["original_y"]:
                         obj["rect"].y += 10
@@ -116,6 +143,9 @@ class Five():
                 for rect in self.screw_rects:
                     rect.y += self.wall_speed
                 if self.wall_rect.top > self.height:
+                    if not self.metal_fall_played:
+                        self.metal_fall_sound.play()
+                        self.metal_fall_played = True
                     self.wall_falling = False
                     self.wall_fallen = True
                     self.button_enabled = True
@@ -124,29 +154,28 @@ class Five():
                 self.button_current = self.idle
                 self.clicked_time = None
 
-            
+            # Draw UI
             self.screen.blit(self.button_current, self.button_rect.topleft)
 
-            
             if not self.wall_fallen:
                 pg.draw.rect(self.screen, (100, 100, 100), self.wall_rect)
-
-                
                 for i in range(4):
                     if self.screws[i]:
                         center = self.screw_rects[i].center
                         pg.draw.circle(self.screen, (30, 30, 30), center, 10)
 
-            
             for obj in self.objects.values():
                 self.screen.blit(obj["surf"], obj["rect"].topleft)
 
             if self.level_passed:
-                self.screen.fill((0,0,0))
+                self.unscrew_sound.stop()
+                self.metal_fall_sound.stop()
+                self.screen.fill((0, 0, 0))
                 self.screen.blit(self.textl, self.text_rectl)
                 pg.display.flip()
                 pg.time.delay(1000)
                 Six().run()
+
             self.screen.blit(self.text, self.text_rect)
             pg.display.flip()
             self.clock.tick(60)

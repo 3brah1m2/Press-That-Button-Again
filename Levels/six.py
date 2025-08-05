@@ -32,6 +32,9 @@ class Six:
         self.text = self.font.render("Lvl 6: Time Traveller", True, (255, 255, 255))
         self.text_rect = self.text.get_rect(topleft=(20, 20))
 
+        self.button_click_sound = pg.mixer.Sound("resources/button click.mp3")
+        self.tick = pg.mixer.Sound("resources/ticking.mp3")
+
         self.lvl = False
         
         self.fontl = pg.font.SysFont(None, 100)
@@ -40,6 +43,7 @@ class Six:
 
     def run(self):
         running = True
+        self.tick.play()
         while running:
             self.screen.fill((0, 0, 0))
             now = pg.time.get_ticks()
@@ -59,6 +63,7 @@ class Six:
 
                     elif self.button_enabled and self.button_rect.collidepoint(event.pos):
                         print("Button clicked!")
+                        self.button_click_sound.play()
                         self.button_current = self.closed
                         self.clicked_time = now
                         self.lvl = True
@@ -73,6 +78,7 @@ class Six:
             self.screen.blit(self.text, self.text_rect)
 
             if self.lvl:
+                self.tick.stop()
                 self.screen.fill((0,0,0))
                 self.screen.blit(self.textl, self.text_rectl)
                 pg.display.flip()

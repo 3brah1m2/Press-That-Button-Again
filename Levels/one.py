@@ -1,5 +1,7 @@
 import pygame as pg
 from two import Two
+
+pg.mixer.pre_init(44100, -16, 2, 512)
 pg.init()
 
 class One():
@@ -8,7 +10,7 @@ class One():
         self.screen = pg.display.set_mode((self.width, self.height), pg.RESIZABLE)
         self.clock = pg.time.Clock()
 
-        # Load both button states
+        # Load button images
         idle = pg.image.load("resources/open.png").convert_alpha()
         clicked = pg.image.load("resources/closed.png").convert_alpha()
 
@@ -17,7 +19,10 @@ class One():
 
         self.button_rect = self.button_idle.get_rect(topleft=(220, 175))
         self.button_current = self.button_idle
-        self.clicked_time = None
+
+        # Load sound effect
+        self.click_sound = pg.mixer.Sound("resources/button click.mp3")
+        self.click_duration = int(self.click_sound.get_length() * 1000)  # duration in milliseconds
 
         # Font for text
         self.font = pg.font.SysFont(None, 48)
@@ -27,40 +32,48 @@ class One():
         self.fontl = pg.font.SysFont(None, 100)
         self.textl = self.fontl.render("Level Passed", True, (0, 255, 0))
         self.text_rectl = self.textl.get_rect(center=(self.width // 2, self.height // 2))
+
+        # Timing control
+        self.click_start_time = None
+        self.show_text_time = None
+
     def run(self):
         running = True
         while running:
             self.screen.fill((0, 0, 0))
-
             now = pg.time.get_ticks()
 
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     running = False
                 elif event.type == pg.MOUSEBUTTONDOWN:
-                    if self.button_rect.collidepoint(event.pos):
-                        print("Button clicked!")
+                    if self.button_rect.collidepoint(event.pos) and not self.click_start_time:
+                        self.click_sound.play()
                         self.button_current = self.button_click
-                        self.clicked_time = now
-                        pg.display.flip()
-                        self.screen.blit(self.textl, self.text_rectl)
-                        pg.display.flip()
-                        pg.time.delay(1000) 
-                        Two().run()
+                        self.click_start_time = now  # start animation/sound timer
 
+            # Handle click sequence
+            if self.click_start_time:
+                elapsed = now - self.click_start_time
 
-            if self.clicked_time and now - self.clicked_time > 100:
-                self.button_current = self.button_idle
-                self.clicked_time = None
-
-            self.screen.blit(self.button_current, self.button_rect.topleft)
-            self.screen.blit(self.text, self.text_rect)
+                if elapsed < self.click_duration:
+                    self.screen.blit(self.text, self.text_rect)
+                    self.screen.blit(self.button_current, self.button_rect.topleft)
+                elif not self.show_text_time:
+                    self.show_text_time = now
+                elif now - self.show_text_time < 1000:
+                    self.screen.blit(self.textl, self.text_rectl)
+                else:
+                    Two().run()
+                    return
+            else:
+                self.screen.blit(self.button_current, self.button_rect.topleft)
+                self.screen.blit(self.text, self.text_rect)
 
             pg.display.flip()
             self.clock.tick(60)
 
         pg.quit()
-
 
 if __name__ == "__main__":
     One().run()

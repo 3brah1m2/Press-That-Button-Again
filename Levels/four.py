@@ -1,5 +1,7 @@
 import pygame as pg
 from five import Five
+
+pg.mixer.pre_init(44100, -16, 2, 512)
 pg.init()
 
 class Four():
@@ -30,13 +32,23 @@ class Four():
             obj["original_y"] = obj["rect"].y
             obj["falling"] = False
 
-        self.clicked_time = None
+        # Font and text
         self.font = pg.font.SysFont(None, 48)
         self.text = self.font.render("Lvl 4: Something Heavy", True, (255, 255, 255))
         self.text_rect = self.text.get_rect(topleft=(20, 20))
         self.fontl = pg.font.SysFont(None, 100)
         self.textl = self.fontl.render("Level Passed", True, (0, 255, 0))
         self.text_rectl = self.textl.get_rect(center=(self.width // 2, self.height // 2))
+
+        # Load sounds
+        self.click_sound = pg.mixer.Sound("resources/button click.mp3")
+        self.stone_sound = pg.mixer.Sound("resources/stone drop.mp3")
+        self.metal_sound = pg.mixer.Sound("resources/metal falling.mp3")
+
+        # State
+        self.transitioning = False
+        self.transition_start = None
+        self.sfx_played = set()
 
     def run(self):
         running = True
@@ -73,6 +85,7 @@ class Four():
                         obj["rect"].x = event.pos[0] + offset_x
                         obj["rect"].y = event.pos[1] + offset_y
 
+            # Handle falling animation
             for key, obj in self.objects.items():
                 if obj["falling"]:
                     if obj["rect"].y < obj["original_y"]:
@@ -82,25 +95,36 @@ class Four():
                     else:
                         obj["falling"] = False
 
-                    if key == "boulder" and obj["rect"].colliderect(self.button_rect):
-                        self.button_current = self.button_click
-                        pg.display.flip()
-                        pg.time.delay(100)
-                        self.screen.blit(self.textl, self.text_rectl)
-                        pg.display.flip()
-                        pg.time.delay(1000)
-                        Five().run()
+                    # Play sound once when it hits ground level (not necessarily the button)
+                    if key not in self.sfx_played and obj["rect"].y >= obj["original_y"]:
+                        self.sfx_played.add(key)
+                        if key == "boulder":
+                            if obj["rect"].colliderect(self.button_rect) and not self.transitioning:
+                                self.stone_sound.play()
+                                self.click_sound.play()
+                                self.transitioning = True
+                                self.transition_start = now
+                                self.button_current = self.button_click
+                            else:
+                                self.stone_sound.play()
+                        elif key == "trophy":
+                            self.metal_sound.play(maxtime=900)  # Play only ~0.9 sec of metal sound
 
-            if self.clicked_time and now - self.clicked_time > 100:
-                self.button_current = self.button_idle
-                self.clicked_time = None
+            # Handle transition after button press
+            if self.transitioning:
+                if now - self.transition_start >= int(self.click_sound.get_length() * 1000) + 200:
+                    self.screen.fill((0, 0, 0))
+                    self.screen.blit(self.textl, self.text_rectl)
+                    pg.display.flip()
+                    pg.time.delay(1000)
+                    Five().run()
+                    return
 
             self.screen.blit(self.button_current, self.button_rect.topleft)
-
             for obj in self.objects.values():
                 self.screen.blit(obj["surf"], obj["rect"].topleft)
-
             self.screen.blit(self.text, self.text_rect)
+
             pg.display.flip()
             self.clock.tick(60)
 

@@ -22,7 +22,7 @@ class Two():
         # Load sound
         self.click_sound = pg.mixer.Sound("resources/button click.mp3")
         self.click_duration = int(self.click_sound.get_length() * 1000)
-
+        self.level_passed_sound = pg.mixer.Sound('resources/level passed.mp3')
         # Font
         self.font = pg.font.SysFont(None, 48)
         self.text = self.font.render("Lvl 2: Double Trouble", True, (255, 255, 255))
@@ -72,10 +72,10 @@ class Two():
             if not self.show_text_time:
                 self.screen.blit(self.text, self.text_rect)
 
-            # After 2 clicks and sound is done, show "Level Passed"
             if self.show_text_time:
                 self.screen.fill((0, 0, 0))
                 self.screen.blit(self.textl, self.text_rectl)
+                self.level_passed_sound.play()
                 if now - self.show_text_time > 1000:
                     Three().run()
                     return

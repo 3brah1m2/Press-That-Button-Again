@@ -1,5 +1,5 @@
 import pygame as pg
-
+from eight import Eight
 pg.init()
 
 class Seven:
@@ -15,6 +15,9 @@ class Seven:
         self.clicked_time = None
         self.checking_cursor = False
         self.button_click_sound = pg.mixer.Sound("resources/button click.mp3")
+        self.level_passed_sound = pg.mixer.Sound('resources/level passed.mp3')
+        self.fail = pg.mixer.Sound('resources/fail.mp3')
+
         self.font = pg.font.SysFont(None, 48)
         self.text = self.font.render("Lvl 7: Hit & Run", True, (255, 255, 255))
         self.text_rect = self.text.get_rect(topleft=(20, 20))
@@ -60,16 +63,18 @@ class Seven:
             if self.status == "pass":
                 self.screen.fill((0,0,0))
                 self.screen.blit(self.text_pass, self.text_rect_large)
+                self.level_passed_sound.play()
                 pg.display.flip()
                 pg.time.delay(1000)
+                Eight().run()
             elif self.status == "fail":
                 self.screen.fill((0,0,0))
                 self.screen.blit(self.text_fail, self.text_rect_large)
                 pg.display.flip()
+                self.fail.play()
                 pg.time.delay(1000)
                 if now - self.status_time > 1000:
-                    self.status = None  # Reset for retry
-
+                    self.status = None
             self.screen.blit(self.button_current, self.button_rect.topleft)
             self.screen.blit(self.text, self.text_rect)
 

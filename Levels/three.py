@@ -21,7 +21,7 @@ class Three():
 
         # Load sound
         self.click_sound = pg.mixer.Sound("resources/button click.mp3")
-
+        self.level_passed_sound = pg.mixer.Sound('resources/level passed.mp3')
         # Fonts
         self.font = pg.font.SysFont(None, 48)
         self.text = self.font.render("Lvl 3: Hold it", True, (255, 255, 255))
@@ -75,6 +75,7 @@ class Three():
             if self.level_passed:
                 self.screen.fill((0, 0, 0))
                 self.screen.blit(self.textl, self.text_rectl)
+                self.level_passed_sound.play()
                 if now - self.pass_display_start >= 1000:
                     Four().run()
                     return

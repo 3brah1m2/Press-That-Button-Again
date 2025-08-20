@@ -34,7 +34,7 @@ class Six:
 
         self.button_click_sound = pg.mixer.Sound("resources/button click.mp3")
         self.tick = pg.mixer.Sound("resources/ticking.mp3")
-
+        self.level_passed_sound = pg.mixer.Sound('resources/level passed.mp3')
         self.lvl = False
         
         self.fontl = pg.font.SysFont(None, 100)
@@ -81,6 +81,7 @@ class Six:
                 self.tick.stop()
                 self.screen.fill((0,0,0))
                 self.screen.blit(self.textl, self.text_rectl)
+                self.level_passed_sound.play()
                 pg.display.flip()
                 pg.time.delay(1000) 
                 Seven().run()

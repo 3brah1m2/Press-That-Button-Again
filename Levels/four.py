@@ -44,7 +44,7 @@ class Four():
         self.click_sound = pg.mixer.Sound("resources/button click.mp3")
         self.stone_sound = pg.mixer.Sound("resources/stone drop.mp3")
         self.metal_sound = pg.mixer.Sound("resources/metal falling.mp3")
-
+        self.level_passed_sound = pg.mixer.Sound('resources/level passed.mp3')
         # State
         self.transitioning = False
         self.transition_start = None
@@ -115,6 +115,7 @@ class Four():
                 if now - self.transition_start >= int(self.click_sound.get_length() * 1000) + 200:
                     self.screen.fill((0, 0, 0))
                     self.screen.blit(self.textl, self.text_rectl)
+                    self.level_passed_sound.play()
                     pg.display.flip()
                     pg.time.delay(1000)
                     Five().run()

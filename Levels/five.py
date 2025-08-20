@@ -52,6 +52,7 @@ class Five():
         self.unscrew_sound = pg.mixer.Sound("resources/unscrewing.mp3")
         self.metal_fall_sound = pg.mixer.Sound("resources/metal falling.mp3")
         self.button_click_sound = pg.mixer.Sound("resources/button click.mp3")
+        self.level_passed_sound = pg.mixer.Sound('resources/level passed.mp3')
 
         self.metal_fall_played = False
         self.unscrewing_playing = False
@@ -172,6 +173,7 @@ class Five():
                 self.metal_fall_sound.stop()
                 self.screen.fill((0, 0, 0))
                 self.screen.blit(self.textl, self.text_rectl)
+                self.level_passed_sound.play()
                 pg.display.flip()
                 pg.time.delay(1000)
                 Six().run()

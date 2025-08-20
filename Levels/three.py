@@ -10,7 +10,6 @@ class Three():
         self.screen = pg.display.set_mode((self.width, self.height), pg.RESIZABLE)
         self.clock = pg.time.Clock()
 
-        # Load button images
         idle = pg.image.load("resources/open.png").convert_alpha()
         clicked = pg.image.load("resources/closed.png").convert_alpha()
 
@@ -19,10 +18,8 @@ class Three():
         self.button_rect = self.button_idle.get_rect(topleft=(220, 175))
         self.button_current = self.button_idle
 
-        # Load sound
         self.click_sound = pg.mixer.Sound("resources/button click.mp3")
         self.level_passed_sound = pg.mixer.Sound('resources/level passed.mp3')
-        # Fonts
         self.font = pg.font.SysFont(None, 48)
         self.text = self.font.render("Lvl 3: Hold it", True, (255, 255, 255))
         self.text_rect = self.text.get_rect(topleft=(20, 20))
@@ -31,7 +28,6 @@ class Three():
         self.textl = self.fontl.render("Level Passed", True, (0, 255, 0))
         self.text_rectl = self.textl.get_rect(center=(self.width // 2, self.height // 2))
 
-        # State
         self.holding = False
         self.hold_start_time = None
         self.level_passed = False
@@ -53,7 +49,6 @@ class Three():
                         self.holding = True
                         self.hold_start_time = now
 
-                        # Only play sound once
                         if not pg.mixer.get_busy():
                             self.click_sound.play()
 
@@ -63,7 +58,6 @@ class Three():
                         self.holding = False
                         self.hold_start_time = None
 
-            # Check if held long enough
             if self.holding and self.hold_start_time:
                 if now - self.hold_start_time >= 3000:
                     self.level_passed = True
@@ -71,7 +65,6 @@ class Three():
                     self.button_current = self.button_idle
                     self.pass_display_start = now
 
-            # Handle level passed display
             if self.level_passed:
                 self.screen.fill((0, 0, 0))
                 self.screen.blit(self.textl, self.text_rectl)

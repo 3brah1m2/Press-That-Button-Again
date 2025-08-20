@@ -57,7 +57,7 @@ class Five():
         self.metal_fall_played = False
         self.unscrewing_playing = False
         self.unscrew_start_time = 0
-        self.unscrew_duration = 1500  # milliseconds
+        self.unscrew_duration = 1500  
 
         self.font = pg.font.SysFont(None, 48)
         self.text = self.font.render("Lvl 5: Mechanic", True, (255, 255, 255))
@@ -117,14 +117,12 @@ class Five():
                         obj["rect"].x = event.pos[0] + self.offset_x
                         obj["rect"].y = event.pos[1] + self.offset_y
 
-            # Screw removal after sound finishes
             if self.unscrewing_playing and now - self.unscrew_start_time >= self.unscrew_duration:
                 self.unscrewing_playing = False
                 for i in self.screws_to_remove:
                     self.screws[i] = False
                 self.screws_to_remove.clear()
 
-            # Handle object falling
             for key, obj in self.objects.items():
                 if key == "screwdriver" and self.unscrewing_playing:
                     continue
@@ -155,7 +153,6 @@ class Five():
                 self.button_current = self.idle
                 self.clicked_time = None
 
-            # Draw UI
             self.screen.blit(self.button_current, self.button_rect.topleft)
 
             if not self.wall_fallen:

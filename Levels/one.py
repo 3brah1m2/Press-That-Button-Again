@@ -10,7 +10,7 @@ class One():
         self.screen = pg.display.set_mode((self.width, self.height), pg.RESIZABLE)
         self.clock = pg.time.Clock()
 
-        # Load button images
+
         idle = pg.image.load("resources/open.png").convert_alpha()
         clicked = pg.image.load("resources/closed.png").convert_alpha()
 
@@ -20,12 +20,11 @@ class One():
         self.button_rect = self.button_idle.get_rect(topleft=(220, 175))
         self.button_current = self.button_idle
 
-        # Load sound effect
         self.click_sound = pg.mixer.Sound("resources/button click.mp3")
         self.click_duration = int(self.click_sound.get_length() * 1000)
         self.level_passed_sound = pg.mixer.Sound('resources/level passed.mp3')
 
-        # Font for text
+
         self.font = pg.font.SysFont(None, 48)
         self.text = self.font.render("Lvl 1: Press", True, (255, 255, 255))
         self.text_rect = self.text.get_rect(topleft=(20, 20))
@@ -34,7 +33,6 @@ class One():
         self.textl = self.fontl.render("Level Passed", True, (0, 255, 0))
         self.text_rectl = self.textl.get_rect(center=(self.width // 2, self.height // 2))
 
-        # Timing control
         self.click_start_time = None
         self.show_text_time = None
 
@@ -51,9 +49,9 @@ class One():
                     if self.button_rect.collidepoint(event.pos) and not self.click_start_time:
                         self.click_sound.play()
                         self.button_current = self.button_click
-                        self.click_start_time = now  # start animation/sound timer
+                        self.click_start_time = now 
 
-            # Handle click sequence
+
             if self.click_start_time:
                 elapsed = now - self.click_start_time
 

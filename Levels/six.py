@@ -8,14 +8,12 @@ class Six:
         self.screen = pg.display.set_mode((self.width, self.height), pg.RESIZABLE)
         self.clock = pg.time.Clock()
 
-        # Button images
         self.idle = pg.transform.scale(pg.image.load('resources/open.png'), (350, 200))
         self.closed = pg.transform.scale(pg.image.load('resources/closed.png'), (350, 200))
         self.button_rect = self.idle.get_rect(topleft=(220, 175))
         self.button_current = self.idle
         self.clicked_time = None
 
-        # Clock faces (images)
         self.clock_faces = ["3", "6", "9", "12"]
         self.clock_images = {
             face: pg.transform.scale(pg.image.load(f"resources/{face}.png"), (100, 100))

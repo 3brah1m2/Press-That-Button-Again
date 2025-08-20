@@ -47,7 +47,6 @@ class Seven:
                         self.checking_cursor = True
                         self.status = None
 
-            # Check if cursor was removed from the button within 50ms
             if self.checking_cursor and self.clicked_time:
                 elapsed = now - self.clicked_time
                 if elapsed > 100:
@@ -59,7 +58,6 @@ class Seven:
                     self.checking_cursor = False
                     self.button_current = self.idle
 
-            # Show result
             if self.status == "pass":
                 self.screen.fill((0,0,0))
                 self.screen.blit(self.text_pass, self.text_rect_large)
